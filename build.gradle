@@ -1,0 +1,58 @@
+plugins {
+    id("com.github.johnrengelman.shadow") version "7.1.1"
+    id("io.micronaut.application") version "3.2.0"
+}
+
+group 'tasklist'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut:micronaut-validation")
+
+    // database
+    implementation group: 'com.h2database', name: 'h2', version: '2.1.214'
+    implementation "org.flywaydb:flyway-core:9.1.6"
+
+    // swagger/openapi
+    annotationProcessor('io.micronaut.openapi:micronaut-openapi:4.4.3')
+
+    // test
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dockerBuild {
+    images = ["hijackit/tasklist:$project.version"]
+}
+
+application {
+    mainClass.set("it.hijack.tasklist.Application")
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion("17")
+    targetCompatibility = JavaVersion.toVersion("17")
+}
+
+graalvmNative.toolchainDetection = false
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("it.hijack.tasklist.*")
+    }
+}
